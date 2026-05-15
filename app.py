@@ -250,7 +250,7 @@ st.markdown("""
 # ─────────────────────────────────────────────
 # DATA LOADING — 4 fichiers mensuels GitHub
 # ─────────────────────────────────────────────
-GITHUB_BASE = https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/
+GITHUB_BASE = "https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/"
 
 MONTHLY_FILES = {
     "Jan": {
