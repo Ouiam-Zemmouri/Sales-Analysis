@@ -250,7 +250,7 @@ st.markdown("""
 # ─────────────────────────────────────────────
 # DATA LOADING — 4 fichiers mensuels GitHub
 # ─────────────────────────────────────────────
-GITHUB_BASE = "https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/"
+GITHUB_BASE = https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/
 
 MONTHLY_FILES = {
     "Jan": {
@@ -298,13 +298,8 @@ def clean_df(df, month_name):
 @st.cache_data(ttl=3600)
 def load_all_data() -> pd.DataFrame:
     frames = []
-    progress = st.sidebar.progress(0, text="Loading data...")
-    months = list(MONTHLY_FILES.items())
-
-    for i, (month_name, info) in enumerate(months):
-        progress.progress((i) / len(months), text=f"📂 Loading {month_name}...")
+    for month_name, info in MONTHLY_FILES.items():
         try:
-            # Single read — try sheet name, fallback to first sheet with COPPER in name
             try:
                 df = pd.read_excel(info["url"], sheet_name=info["sheet"],
                                    header=4, engine="openpyxl")
@@ -312,17 +307,12 @@ def load_all_data() -> pd.DataFrame:
                 xl = pd.ExcelFile(info["url"], engine="openpyxl")
                 sheet = next((s for s in xl.sheet_names if "COPPER" in s.upper()), xl.sheet_names[0])
                 df = pd.read_excel(xl, sheet_name=sheet, header=4, engine="openpyxl")
-
             df = clean_df(df, month_name)
             frames.append(df)
         except Exception as e:
-            st.sidebar.warning(f"⚠️ {month_name}: {str(e)[:60]}")
-
-    progress.progress(1.0, text="✅ Done!")
-    progress.empty()
-
+            pass  # silently skip failed months
     if not frames:
-        st.error("❌ No data could be loaded.")
+        st.error("❌ No data could be loaded. Check GitHub file names.")
         st.stop()
     return pd.concat(frames, ignore_index=True)
 
@@ -334,7 +324,7 @@ with st.sidebar:
     # COFICAB Logo from GitHub
     st.markdown("""
     <div style="text-align:center; padding: 20px 0 12px 0;">
-        <img src="https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/COFICAB.png"
+        <img src=https://raw.githubusercontent.com/Ouiam-Zemmouri/LME_Sales-Analysis/main/COFICAB.png
              style="max-width:155px; border-radius:10px;
                     filter: drop-shadow(0 4px 12px rgba(99,179,237,0.15));" />
     </div>
@@ -499,9 +489,9 @@ with tab1:
     kpis_row1 = [
         ("CA Total (€)", f"€{total_ca/1e6:.2f}M", "Chiffre d'Affaires"),
         ("Qty Total (km)", f"{total_qty_km:,.0f}", "km vendus"),
-        ("Avg CA €/km", f"€{avg_ca_km:,.2f}", "Prix unitaire moyen"),
         ("Tonnage RC (T)", f"{total_tonnage_t:,.1f}", "Real Copper"),
         ("Avg LME All-In", f"{avg_lme:.4f} €/kg", "LME moyen"),
+        ("Avg Basic LME €/kg", f"{avg_basic_lme:.4f}", "LME basic moyen"),
     ]
     for col, (label, val, sub) in zip([k1,k2,k3,k4,k5], kpis_row1):
         col.markdown(f"""
@@ -534,9 +524,6 @@ with tab1:
     k11, k12, k13, k14 = st.columns(4)
     kpis_row3 = [
         ("Avg Basic LME €/kg", f"{avg_basic_lme:.4f}", "LME basic moyen"),
-        ("Total AV Index",     f"€{total_av:,.0f}",    "Somme AV INDEX"),
-        ("CC Needs Kg Total",  f"{total_cc_kg:,.0f}",  "Commercial Copper"),
-        ("RC Needs Kg Total",  f"{total_rc_kg:,.0f}",  "Real Copper"),
     ]
     for col, (label, val, sub) in zip([k11,k12,k13,k14], kpis_row3):
         col.markdown(f"""
@@ -589,32 +576,6 @@ with tab1:
             .set_properties(**{"background-color": "#0d1321", "color": "#a0aec0"}),
         use_container_width=True, hide_index=True
     )
-
-    # Radar
-    ent_radar = df.groupby("ENTITIES").agg(
-        CA=("TOTAL AMOUNT €","sum"), Qty=("QTY Km","sum"),
-        RC=("RC Needs Kg", lambda x: x.sum()/df.loc[x.index,"QTY Km"].sum()),
-        CC=("CC Needs Kg", lambda x: x.sum()/df.loc[x.index,"QTY Km"].sum()),
-        AV=("AV INDEX",   lambda x: x.sum()/df.loc[x.index,"QTY Km"].sum()),
-    ).reset_index()
-    categories = ["CA €M", "Qty km", "RC Kg/km", "CC Kg/km", "AV €/km"]
-    fig_radar = go.Figure()
-    colors_radar = [COLORS["primary"], COLORS["gold"]]
-    radar_fills  = ["rgba(99,179,237,0.12)", "rgba(246,173,85,0.12)"]
-    for i, (_, row_r) in enumerate(ent_radar.iterrows()):
-        vals = [row_r["CA"]/1e6, row_r["Qty"]/1e3, row_r["RC"], row_r["CC"], row_r["AV"]]
-        fig_radar.add_trace(go.Scatterpolar(
-            r=vals, theta=categories, fill="toself",
-            name=row_r["ENTITIES"], line_color=colors_radar[i],
-            fillcolor=radar_fills[i]
-        ))
-    fig_radar.update_layout(
-        **{k:v for k,v in CHART_LAYOUT.items() if k not in ["xaxis","yaxis"]},
-        polar=dict(radialaxis=dict(visible=True, gridcolor="#1a2035"),
-                   bgcolor="#0a0f1a", angularaxis=dict(gridcolor="#1a2035")),
-        title="Entity Comparison (Radar)",
-    )
-    st.plotly_chart(fig_radar, use_container_width=True)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -881,7 +842,7 @@ with tab3:
         # Donut – CA by Fixation
         fig_donut3 = px.pie(
             fix_data, values="CA", names="Fixation",
-            hole=0.55, title="Revenue (€) by Fixation",
+            hole=0.55, title="CA (€) by Fixation",
             color_discrete_sequence=[COLORS["gold"], COLORS["red"], COLORS["blue"]],
         )
         fig_donut3.update_traces(textposition="outside", textinfo="label+percent")
@@ -969,7 +930,7 @@ with tab4:
     with col_f1:
         fig_fam = px.bar(
             fam_data, x="FAMILY", y="CA",
-            title="Revenue (€) by Family — Top 15",
+            title="CA (€) by Family — Top 15",
             color="CA", color_continuous_scale=["#0a0f1a","#63b3ed"],
             text_auto=".2s",
         )
@@ -986,31 +947,6 @@ with tab4:
         fig_fam2.update_layout(**CHART_LAYOUT, coloraxis_showscale=False,
                                 xaxis_tickangle=-45)
         st.plotly_chart(fig_fam2, use_container_width=True)
-
-    # LME vs Qty scatter
-    st.markdown('<div class="section-header">⚖️ LME Price vs Volume</div>', unsafe_allow_html=True)
-    scatter_data = (
-        df.groupby(["GROUPS","ENTITIES","Fixation"])
-          .agg(
-              LME=("LME SALES €/kg","mean"),
-              Basic_LME=("BASIC LME  €/kg","mean"),
-              Qty_Km=("QTY Km","sum"),
-              CA=("TOTAL AMOUNT €","sum"),
-          )
-          .reset_index()
-    )
-    fig_scatter = px.scatter(
-        scatter_data,
-        x="Qty_Km", y="LME",
-        color="ENTITIES", symbol="Fixation", size="CA",
-        hover_name="GROUPS",
-        labels={"Qty_Km":"Qty (km)", "LME":"LME All-In €/kg"},
-        title="LME All-In (€/kg) vs Volume (km) — by Group, Entity & Fixation",
-        color_discrete_sequence=[COLORS["red"], COLORS["blue"]],
-        size_max=50,
-    )
-    fig_scatter.update_layout(**CHART_LAYOUT)
-    st.plotly_chart(fig_scatter, use_container_width=True)
 
     # RM breakdown
     st.markdown('<div class="section-header">🧱 Raw Material (RM) Breakdown</div>',
@@ -1054,46 +990,6 @@ with tab4:
     fig_spool.update_layout(**CHART_LAYOUT)
     st.plotly_chart(fig_spool, use_container_width=True)
 
-    # LME Projects heatmap
-    st.markdown('<div class="section-header">🌐 LME Projects Distribution</div>',
-                unsafe_allow_html=True)
-    proj_fix = (
-        df.groupby(["LME PROJECTS","Fixation"])
-          .agg(Qty_Km=("QTY Km","sum"))
-          .reset_index()
-          .pivot(index="LME PROJECTS", columns="Fixation", values="Qty_Km")
-          .fillna(0)
-    )
-    fig_heat = px.imshow(
-        proj_fix,
-        color_continuous_scale=["#0a0f1a","#63b3ed"],
-        title="Qty (km) Heatmap — LME Projects × Fixation",
-        text_auto=".0f",
-    )
-    fig_heat.update_layout(**{k:v for k,v in CHART_LAYOUT.items()
-                               if k not in ["xaxis","yaxis"]})
-    st.plotly_chart(fig_heat, use_container_width=True)
-
-    # Cross-section distribution
-    st.markdown('<div class="section-header">📐 Cross Section mm Distribution</div>',
-                unsafe_allow_html=True)
-    cs_data = (
-        df.groupby("ES mm")
-          .agg(Qty_Km=("QTY Km","sum"), Count=("QTY Km","count"))
-          .reset_index()
-          .sort_values("Qty_Km", ascending=False)
-          .head(20)
-    )
-    fig_cs = px.bar(
-        cs_data, x="ES mm", y="Qty_Km",
-        title="Top 20 Cross Sections by Qty (km)",
-        color="Qty_Km", color_continuous_scale=["#0a0f1a","#63b3ed"],
-        text_auto=".0f",
-    )
-    fig_cs.update_layout(**CHART_LAYOUT, coloraxis_showscale=False)
-    st.plotly_chart(fig_cs, use_container_width=True)
-
-
 # ═══════════════════════════════════════════════════════════
 # TAB 5 – RAW DATA
 # ═══════════════════════════════════════════════════════════
@@ -1103,7 +999,7 @@ with tab5:
     # Search bar
     search_query = st.text_input(
         "",
-        placeholder="🔍  Search across all columns (e.g. KROMBERG, M-1, PVC...)",
+        placeholder="🔍  Search across all columns",
         label_visibility="collapsed"
     )
 
@@ -1128,27 +1024,13 @@ with tab5:
 
     st.dataframe(display_df, use_container_width=True, height=500)
 
-    # Summary stats
-    st.markdown('<div class="section-header">📊 Descriptive Statistics</div>',
-                unsafe_allow_html=True)
-    num_cols = ["QTY Km","RC Needs Kg","CC Needs Kg","ES mm","LME SALES €/kg",
-                "BASIC LME  €/kg","TOTAL AMOUNT €","UNIT PRICE €/km","AV INDEX",
-                "REAL COPPER Kg/km","COMMERCIAL COPPER Kg/km","ADDED VALUE €/km"]
-    existing_num = [c for c in num_cols if c in df.columns]
-    st.dataframe(
-        df[existing_num].describe().round(4)
-            .style.set_properties(**{"background-color": "#1a1f2e", "color": "#aab4c8"}),
-        use_container_width=True,
-    )
-
 # ─────────────────────────────────────────────
 # FOOTER
 # ─────────────────────────────────────────────
 st.markdown("""
 <div style="text-align:center; color:#444; font-size:0.75rem; margin-top:40px; padding:16px;
             border-top:1px solid #2d3561;">
-  LME Sales Analysis 2026 · COFICAB Kenitra & COFICAB Maroc ·
-  Built with Streamlit & Plotly
+  LME Sales Analysis 2026 · COFICAB Kenitra & COFICAB Maroc
 </div>
 """, unsafe_allow_html=True)
 
