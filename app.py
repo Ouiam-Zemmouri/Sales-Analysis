@@ -506,7 +506,6 @@ with tab1:
     k6, k7, k8, k9, k10 = st.columns(5)
     kpis_row2 = [
         ("Avg ES mm",    f"{avg_es:.3f}",          "Sous-total ES mm / km"),
-        ("Avg Cross-Section mm", f"{avg_cs:.3f}",  "Total ES / Total km"),
         ("Avg RC Kg/km", f"{avg_rc_kg_km:.3f}",    "Real Copper Kg/km"),
         ("Avg CC Kg/km", f"{avg_cc_kg_km:.3f}",    "Commercial Copper Kg/km"),
         ("Avg AV €/km",  f"€{avg_av_km:.2f}",      "Added Value / km"),
