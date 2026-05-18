@@ -69,7 +69,29 @@ LAY = dict(
 # ── LOAD DATA (1.3 MB CSV — instantané) ──
 @st.cache_data
 def load_data():
-    df = pd.read_csv("lme_dashboard_data.csv", encoding="utf-8-sig")
+    # Try multiple encodings to be safe
+    for enc in ["utf-8", "utf-8-sig", "latin-1"]:
+        try:
+            df = pd.read_csv("lme_dashboard_data.csv", encoding=enc)
+            break
+        except Exception:
+            continue
+    # Strip BOM and spaces from column names
+    df.columns = df.columns.str.strip().str.lstrip("\ufeff")
+    # Normalize any leftover renamed columns
+    rename_map = {
+        "QTY_Km":        "QTY Km",
+        "RC_Needs_Kg":   "RC Needs Kg",
+        "CC_Needs_Kg":   "CC Needs Kg",
+        "ES_mm":         "ES mm",
+        "AV_INDEX":      "AV INDEX",
+        "TOTAL_AMOUNT":  "TOTAL AMOUNT €",
+        "LME_SALES_avg": "LME SALES €/kg",
+        "BASIC_LME_avg": "BASIC LME  €/kg",
+        "UNIT_PRICE_avg":"UNIT PRICE €/km",
+        "AV_avg":        "ADDED VALUE €/km",
+    }
+    df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
     return df
 
 df_raw = load_data()
