@@ -219,7 +219,7 @@ with tab1:
                       title="Quantité par Entité (km)", color_discrete_sequence=[C["teal"],C["purple"]])
         fig2.update_layout(**LAY); st.plotly_chart(fig2, use_container_width=True)
 
-    st.markdown('<div class="section-header">📐 ES mm & Cross Section par Entité</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📐 Cross Section by Entity</div>', unsafe_allow_html=True)
     es_ent = (df.groupby("ENTITIES")
                 .apply(lambda g: pd.Series({
                     "Total ES mm":       g["ES mm"].sum(),
@@ -355,7 +355,7 @@ with tab2:
     figgrp.update_layout(**lay_grp)
     figgrp.update_layout(
         barmode="group",
-        title="LME Moyen par Groupe Client",
+        title="LME Moyen par Groupe",
         height=500,
     )
     figgrp.update_yaxes(
