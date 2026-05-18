@@ -389,21 +389,56 @@ with tab3:
 
 # ── TAB 4 ──
 with tab4:
-    st.markdown('<div class="section-header">🔬 Analyse par Famille</div>', unsafe_allow_html=True)
-    fam = (df.groupby("FAMILY").agg(CA=("TOTAL AMOUNT €","sum"),Qty_Km=("QTY Km","sum"),
-            Tonnage_T=("RC Needs Kg",lambda x:x.sum()/1000)).reset_index()
-           .sort_values("CA",ascending=False).head(15))
-    cl,cr = st.columns(2)
-    with cl:
-        fig = px.bar(fam,x="FAMILY",y="CA",title="CA (€) — Top 15 Familles",
-                     color="CA",color_continuous_scale=["#0a0f1a","#63b3ed"],text_auto=".2s")
-        fig.update_layout(**LAY,coloraxis_showscale=False,xaxis_tickangle=-45)
-        st.plotly_chart(fig,use_container_width=True)
-    with cr:
-        fig2 = px.bar(fam,x="FAMILY",y="Tonnage_T",title="Tonnage (T) — Top 15 Familles",
-                      color="Tonnage_T",color_continuous_scale=["#0a0f1a","#4fd1c5"],text_auto=".1f")
-        fig2.update_layout(**LAY,coloraxis_showscale=False,xaxis_tickangle=-45)
-        st.plotly_chart(fig2,use_container_width=True)
+    st.markdown('<div class="section-header">🔬 Analyse par Family & CS</div>', unsafe_allow_html=True)
+
+    # Dimension selector
+    dim_col = st.radio("Grouper par", ["FAMILY & CS", "FAMILY"], horizontal=True, key="dim_radio")
+    top_n   = st.slider("Nombre de références à afficher", 5, 30, 15, key="topn_slider")
+
+    if dim_col not in df.columns:
+        st.warning(f"Colonne '{dim_col}' absente du CSV.")
+    else:
+        fam = (df.groupby(dim_col).agg(
+                    CA=("TOTAL AMOUNT €","sum"),
+                    Qty_Km=("QTY Km","sum"),
+                    Tonnage_T=("RC Needs Kg", lambda x: x.sum()/1000))
+               .reset_index()
+               .sort_values("CA", ascending=False)
+               .head(top_n))
+
+        cl, cr = st.columns(2)
+        with cl:
+            fig = px.bar(fam, x=dim_col, y="CA",
+                         title=f"CA (€) — Top {top_n} {dim_col}",
+                         color="CA", color_continuous_scale=["#0a0f1a","#63b3ed"],
+                         text_auto=".2s")
+            fig.update_layout(**LAY, coloraxis_showscale=False, xaxis_tickangle=-45)
+            st.plotly_chart(fig, use_container_width=True)
+        with cr:
+            fig2 = px.bar(fam, x=dim_col, y="Tonnage_T",
+                          title=f"Tonnage (T) — Top {top_n} {dim_col}",
+                          color="Tonnage_T", color_continuous_scale=["#0a0f1a","#4fd1c5"],
+                          text_auto=".1f")
+            fig2.update_layout(**LAY, coloraxis_showscale=False, xaxis_tickangle=-45)
+            st.plotly_chart(fig2, use_container_width=True)
+
+        # Table détail
+        st.markdown('<div class="section-header">📋 Détail par référence</div>', unsafe_allow_html=True)
+        fam_detail = (df.groupby(dim_col).agg(
+                CA=("TOTAL AMOUNT €","sum"),
+                Qty_Km=("QTY Km","sum"),
+                Tonnage_T=("RC Needs Kg", lambda x: x.sum()/1000),
+                Avg_LME=("LME SALES €/kg","mean"),
+                Avg_Basic=("BASIC LME  €/kg","mean"))
+            .reset_index()
+            .sort_values("CA", ascending=False))
+        st.dataframe(
+            fam_detail.style
+                .format({"CA":"€{:,.0f}","Qty_Km":"{:,.1f}","Tonnage_T":"{:,.1f}",
+                         "Avg_LME":"{:.4f}","Avg_Basic":"{:.4f}"})
+                .background_gradient(subset=["CA"], cmap="Blues")
+                .set_properties(**{"background-color":"#0d1321","color":"#a0aec0"}),
+            use_container_width=True, hide_index=True, height=400)
 
     st.markdown('<div class="section-header">🧱 Matière Première (RM)</div>', unsafe_allow_html=True)
     rm = df.groupby("RM").agg(Qty_Km=("QTY Km","sum"),Tonnage_T=("RC Needs Kg",lambda x:x.sum()/1000)).reset_index()
