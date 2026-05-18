@@ -436,7 +436,6 @@ with tab4:
             fam_detail.style
                 .format({"CA":"€{:,.0f}","Qty_Km":"{:,.1f}","Tonnage_T":"{:,.1f}",
                          "Avg_LME":"{:.4f}","Avg_Basic":"{:.4f}"})
-                .background_gradient(subset=["CA"], cmap="Blues")
                 .set_properties(**{"background-color":"#0d1321","color":"#a0aec0"}),
             use_container_width=True, hide_index=True, height=400)
 
