@@ -330,10 +330,55 @@ with tab2:
            Basic_LME=("BASIC LME  €/kg","mean"), CA=("TOTAL AMOUNT €","sum"))
            .reset_index().sort_values("CA", ascending=False))
     figgrp = go.Figure()
-    for yc, color, name in [("LME_Sales",C["primary"],"LME All-In €/kg"),("Basic_LME",C["gold"],"Basic LME €/kg")]:
-        figgrp.add_trace(go.Bar(x=gd["GROUPS"], y=gd[yc], name=name, marker_color=color, opacity=0.9,
-            text=[f"{v:.4f}" for v in gd[yc]], textposition="auto"))
-    figgrp.update_layout(**LAY, barmode="group", title="LME Moyen par Groupe Client")
+    # Couleurs professionnelles : bleu acier + vert émeraude
+    bar_colors = [("#2563EB", "#1E40AF"), ("#059669", "#047857")]
+    for (yc, name), (col_main, col_border) in zip(
+        [("LME_Sales","LME All-In €/kg"), ("Basic_LME","Basic LME €/kg")],
+        bar_colors
+    ):
+        figgrp.add_trace(go.Bar(
+            x=gd["GROUPS"], y=gd[yc], name=name,
+            marker=dict(
+                color=col_main,
+                line=dict(color=col_border, width=1),
+                opacity=0.92,
+            ),
+            text=[f"{v:.4f}" for v in gd[yc]],
+            textposition="outside",
+            textfont=dict(size=9, color="#cbd5e0"),
+        ))
+
+    all_vals = list(gd["LME_Sales"]) + list(gd["Basic_LME"])
+    y_max = max(all_vals) * 1.06
+
+    figgrp.update_layout(
+        **LAY,
+        barmode="group",
+        title="LME Moyen par Groupe Client",
+        yaxis=dict(
+            range=[0, y_max],
+            dtick=0.5,                          # graduations tous les 0.5
+            gridcolor="rgba(255,255,255,0.06)",
+            zeroline=False,
+            tickfont=dict(color="#718096", size=11),
+            title="€/kg",
+            title_font=dict(color="#718096", size=11),
+        ),
+        xaxis=dict(
+            tickangle=-35,
+            tickfont=dict(color="#a0aec0", size=10),
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.02,
+            xanchor="right",  x=1,
+            bgcolor="rgba(13,19,33,0.8)",
+            bordercolor="rgba(99,179,237,0.2)",
+            borderwidth=1,
+            font=dict(color="#a0aec0", size=11),
+        ),
+        height=500,
+    )
     st.plotly_chart(figgrp, use_container_width=True)
 
 # ── TAB 3 ──
