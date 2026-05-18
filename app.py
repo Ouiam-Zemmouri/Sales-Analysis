@@ -182,7 +182,7 @@ month_order = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"
 
 # ── TITLE ──
 st.markdown('<div class="title-banner"><h1>SALES ANALYSIS 2026</h1></div>', unsafe_allow_html=True)
-st.caption(f"📊 **{len(df):,}** groupes · **{df['ENTITIES'].nunique()}** entité(s) · **{df['Month Name'].nunique()}** mois")
+st.caption(f"📊 **{df['ENTITIES'].nunique()}** entité(s) · **{df['Month Name'].nunique()}** mois")
 
 # ════════════════════════════════════════════
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 KPI Summary","📈 LME Overview","🏭 Fixation","🔬 Deep Dive","📋 Données"])
