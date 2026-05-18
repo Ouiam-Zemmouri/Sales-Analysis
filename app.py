@@ -351,34 +351,33 @@ with tab2:
     all_vals = list(gd["LME_Sales"]) + list(gd["Basic_LME"])
     y_max = max(all_vals) * 1.06
 
+    lay_grp = {**LAY}
+    figgrp.update_layout(**lay_grp)
     figgrp.update_layout(
-        **LAY,
         barmode="group",
         title="LME Moyen par Groupe Client",
-        yaxis=dict(
-            range=[0, y_max],
-            dtick=0.5,                          # graduations tous les 0.5
-            gridcolor="rgba(255,255,255,0.06)",
-            zeroline=False,
-            tickfont=dict(color="#718096", size=11),
-            title="€/kg",
-            title_font=dict(color="#718096", size=11),
-        ),
-        xaxis=dict(
-            tickangle=-35,
-            tickfont=dict(color="#a0aec0", size=10),
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom", y=1.02,
-            xanchor="right",  x=1,
-            bgcolor="rgba(13,19,33,0.8)",
-            bordercolor="rgba(99,179,237,0.2)",
-            borderwidth=1,
-            font=dict(color="#a0aec0", size=11),
-        ),
         height=500,
     )
+    figgrp.update_yaxes(
+        range=[0, y_max],
+        dtick=0.5,
+        gridcolor="rgba(255,255,255,0.06)",
+        zeroline=False,
+        tickfont=dict(color="#718096", size=11),
+        title_text="€/kg",
+    )
+    figgrp.update_xaxes(
+        tickangle=-35,
+        tickfont=dict(color="#a0aec0", size=10),
+    )
+    figgrp.update_layout(legend=dict(
+        orientation="h", yanchor="bottom", y=1.02,
+        xanchor="right", x=1,
+        bgcolor="rgba(13,19,33,0.8)",
+        bordercolor="rgba(99,179,237,0.2)",
+        borderwidth=1,
+        font=dict(color="#a0aec0", size=11),
+    ))
     st.plotly_chart(figgrp, use_container_width=True)
 
 # ── TAB 3 ──
