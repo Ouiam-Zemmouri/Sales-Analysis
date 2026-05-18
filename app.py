@@ -70,23 +70,6 @@ LAY = dict(
 @st.cache_data
 def load_data():
     df = pd.read_csv("lme_dashboard_data.csv", encoding="utf-8-sig")
-    # rename aggregated columns back to friendly names
-    df = df.rename(columns={
-        "QTY_Km":        "QTY Km",
-        "RC_Needs_Kg":   "RC Needs Kg",
-        "CC_Needs_Kg":   "CC Needs Kg",
-        "ES_mm":         "ES mm",
-        "AV_INDEX":      "AV INDEX",
-        "TOTAL_AMOUNT":  "TOTAL AMOUNT €",
-        "LME_SALES_avg": "LME SALES €/kg",
-        "BASIC_LME_avg": "BASIC LME  €/kg",
-        "UNIT_PRICE_avg":"UNIT PRICE €/km",
-        "AV_avg":        "ADDED VALUE €/km",
-        "CROSS SECTION mm": "ES mm_cs",  # keep cross section separate
-    })
-    # restore cross section column name
-    if "CROSS SECTION mm" not in df.columns and "ES mm_cs" in df.columns:
-        df["CROSS SECTION mm"] = df["ES mm_cs"]
     return df
 
 df_raw = load_data()
