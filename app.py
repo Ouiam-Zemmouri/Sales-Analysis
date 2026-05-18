@@ -106,13 +106,18 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("## 🔍 Filtres")
 
+    MONTH_ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+
     def ms(label, col):
         if col not in df_raw.columns:
             return []
-        vals = sorted(df_raw[col].dropna().astype(str).unique())
+        if col == "Month Name":
+            all_vals = [m for m in MONTH_ORDER if m in df_raw[col].astype(str).values]
+        else:
+            all_vals = sorted(df_raw[col].dropna().astype(str).unique())
         st.markdown(f'<p class="filter-label">{label}</p>', unsafe_allow_html=True)
-        sel = st.multiselect("", vals, default=[], key=f"f_{col}", placeholder="Tous", label_visibility="collapsed")
-        return sel if sel else list(vals)
+        sel = st.multiselect("", all_vals, default=[], key=f"f_{col}", placeholder="Tous", label_visibility="collapsed")
+        return sel if sel else list(all_vals)
 
     f_entity = ms("Entity",          "ENTITIES")
     f_month  = ms("Month",           "Month Name")
