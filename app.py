@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -230,7 +230,7 @@ with tab1:
                     "Avg AV €/km":       g["AV INDEX"].sum()/g["QTY Km"].sum() if g["QTY Km"].sum() else 0,
                 })).reset_index())
     st.dataframe(es_ent.style
-        .format({"Total ES mm":"{:,.3f}","Total Qty km":"{:,.2f}","Avg Cross Section":"{:.3f}",
+        .format({"Total Qty km":"{:,.2f}","Avg Cross Section":"{:.3f}",
                  "Avg RC Kg/km":"{:.3f}","Avg CC Kg/km":"{:.3f}","Avg AV €/km":"€{:.2f}"})
         .set_properties(**{"background-color":"#0d1321","color":"#a0aec0"}),
         use_container_width=True, hide_index=True)
@@ -277,7 +277,7 @@ with tab2:
         st.markdown("##### Basic LME (€/kg)")
         st.plotly_chart(band_chart(monthly,"Basic_LME","Basic_Min","Basic_Max",ent_c2,fills,"Basic LME €/kg","diamond"), use_container_width=True)
 
-    st.markdown('<div class="section-header">📊 All-In vs Basic — Vue Combinée</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📊 All-In vs Basic — Combined view</div>', unsafe_allow_html=True)
     mall = (df.groupby(["Month","Month Name"])
               .agg(LME_Sales=("LME SALES €/kg","mean"), Basic_LME=("BASIC LME  €/kg","mean"))
               .reset_index())
@@ -325,7 +325,7 @@ with tab2:
         figfx2.update_layout(**LAY, barmode="group", title="Qty (km) par Fixation")
         st.plotly_chart(figfx2, use_container_width=True)
 
-    st.markdown('<div class="section-header">📦 Performance par Groupe Client</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📦 Performance par Groupe</div>', unsafe_allow_html=True)
     gd = (df.groupby("GROUPS").agg(LME_Sales=("LME SALES €/kg","mean"),
            Basic_LME=("BASIC LME  €/kg","mean"), CA=("TOTAL AMOUNT €","sum"))
            .reset_index().sort_values("CA", ascending=False))
