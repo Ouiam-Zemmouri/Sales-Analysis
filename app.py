@@ -67,7 +67,7 @@ LAY = dict(
 )
 
 # ── LOAD DATA (1.3 MB CSV — instantané) ──
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_data():
     # Try multiple encodings to be safe
     for enc in ["utf-8", "utf-8-sig", "latin-1"]:
