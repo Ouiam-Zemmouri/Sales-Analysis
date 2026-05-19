@@ -14,44 +14,44 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 html,body,[class*="css"]{font-family:'Inter',sans-serif;}
-.main,[data-testid="stAppViewContainer"]{background:#0b1628;}
+.main,[data-testid="stAppViewContainer"]{background:#0f1b3d;}
 [data-testid="stHeader"]{background:transparent;}
 .block-container{padding-top:1.5rem;padding-bottom:2rem;}
 
 .title-banner{
-  background:linear-gradient(135deg,#0d1e3a 0%,#122040 50%,#0d1e3a 100%);
-  border:1px solid rgba(184,115,51,0.25);border-top:3px solid #b87333;
+  background:linear-gradient(135deg,#0f1b3d 0%,#1B2F6E 50%,#0f1b3d 100%);
+  border:1px solid rgba(139,94,60,0.3);border-top:3px solid #8B5E3C;
   border-radius:16px;padding:30px 40px;margin-bottom:28px;text-align:center;
-  box-shadow:0 6px 60px rgba(184,115,51,0.08);
+  box-shadow:0 6px 60px rgba(27,47,110,0.3);
 }
 .title-banner h1{
   font-size:2rem;font-weight:800;letter-spacing:5px;margin:0;text-transform:uppercase;
-  background:linear-gradient(90deg,#b87333,#d4956a,#f5cba7,#d4956a,#b87333);
+  background:linear-gradient(90deg,#FFFFFF,#d4a97a,#FFFFFF,#d4a97a,#FFFFFF);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.title-banner p{color:#8faac8;font-size:0.8rem;margin:8px 0 0 0;letter-spacing:2px;}
+.title-banner p{color:#8fa3c8;font-size:0.8rem;margin:8px 0 0 0;letter-spacing:2px;}
 
 .kpi-card{
-  background:linear-gradient(145deg,#0d1e3a,#112244);
-  border:1px solid rgba(255,255,255,0.05);border-left:3px solid #b87333;
+  background:linear-gradient(145deg,#162040,#1a2850);
+  border:1px solid rgba(255,255,255,0.06);border-left:3px solid #8B5E3C;
   border-radius:12px;padding:18px 14px;text-align:center;
   height:118px;display:flex;flex-direction:column;justify-content:center;
-  box-shadow:0 2px 24px rgba(0,0,0,0.4);transition:all 0.2s ease;
+  box-shadow:0 2px 24px rgba(0,0,0,0.5);transition:all 0.2s ease;
 }
-.kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(184,115,51,0.12);}
-.kpi-label{color:#4a6080;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
-.kpi-value{font-size:1.5rem;font-weight:700;line-height:1.1;}
-.kpi-sub{color:#2d4060;font-size:0.67rem;margin-top:5px;} .kpi-unit{margin-top:4px;}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(27,47,110,0.25);}
+.kpi-label{color:#8fa3c8;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+.kpi-value{font-size:1.5rem;font-weight:700;line-height:1.1;color:#FFFFFF;}
+.kpi-sub{color:#4a6080;font-size:0.67rem;margin-top:5px;} .kpi-unit{margin-top:4px;}
 
 .section-header{
-  color:#b87333;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;
-  border-bottom:1px solid rgba(184,115,51,0.2);padding-bottom:8px;margin:28px 0 18px 0;
+  color:#8B5E3C;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;
+  border-bottom:1px solid rgba(139,94,60,0.25);padding-bottom:8px;margin:28px 0 18px 0;
 }
 
-.stTabs [data-baseweb="tab-list"]{gap:4px;background:#0d1e3a;border:1px solid rgba(184,115,51,0.12);border-radius:12px;padding:5px;}
-.stTabs [data-baseweb="tab"]{background:transparent;color:#3a5070;border-radius:9px;font-weight:600;font-size:0.82rem;padding:9px 22px;}
-.stTabs [data-baseweb="tab"]:hover{color:#d4956a;background:rgba(184,115,51,0.06);}
-.stTabs [aria-selected="true"]{background:linear-gradient(135deg,#1a2e4a,#1e3660) !important;color:#d4956a !important;box-shadow:0 2px 12px rgba(184,115,51,0.15);}
+.stTabs [data-baseweb="tab-list"]{gap:4px;background:#162040;border:1px solid rgba(27,47,110,0.3);border-radius:12px;padding:5px;}
+.stTabs [data-baseweb="tab"]{background:transparent;color:#8fa3c8;border-radius:9px;font-weight:600;font-size:0.82rem;padding:9px 22px;}
+.stTabs [data-baseweb="tab"]:hover{color:#d4a97a;background:rgba(139,94,60,0.08);}
+.stTabs [aria-selected="true"]{background:linear-gradient(135deg,#1B2F6E,#243d8a) !important;color:#FFFFFF !important;box-shadow:0 2px 16px rgba(27,47,110,0.4);}
 
 [data-testid="stSidebar"]{background:#080f1e;border-right:1px solid rgba(184,115,51,0.08);}
 .filter-label{color:#3a5070;font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:14px 0 3px 0;}
@@ -66,29 +66,42 @@ html,body,[class*="css"]{font-family:'Inter',sans-serif;}
 </style>
 """, unsafe_allow_html=True)
 
-# ── TOKENS ──
-NAVY   = "#0b1628";  NAVY_MD = "#0d1e3a"; NAVY_LT = "#1a2e4a"
-COPPER = "#b87333";  COP_LT  = "#d4956a"; COP_XL  = "#f5cba7"
-BLUE   = "#2b6cb0";  TEAL    = "#0ea5a0"; GOLD    = "#d4a017"
-WHITE  = "#e8edf5";  SLATE   = "#8faac8"; ICE     = "#c8d8ea"
+# ── TOKENS — COFICAB Brand Colors ──
+NAVY     = "#0f1b3d"   # deep navy background
+NAVY_MD  = "#162040"   # card background
+NAVY_LT  = "#1B2F6E"   # COFICAB logo navy — primary brand
+NAVY_ACT = "#243d8a"   # lighter navy for hover/active
 
-ENT_C  = [BLUE, COPPER]
-FIX_C  = {"M-1": BLUE, "3M-1": COPPER, "3M-2": TEAL}
+COPPER   = "#8B5E3C"   # COFICAB logo copper — primary accent
+COP_LT   = "#b07d52"   # lighter copper
+COP_XL   = "#d4a97a"   # very light copper
+
+WHITE    = "#FFFFFF"   # pure white
+OFF_WHITE= "#e8edf5"   # soft white for values
+SLATE    = "#8fa3c8"   # muted blue-grey for subtitles
+ICE      = "#c8d5ea"   # light blue-white for text
+
+BLUE     = "#1B2F6E"   # same as NAVY_LT — brand navy
+TEAL     = "#2a5298"   # mid navy-blue
+GOLD     = "#c49040"   # warm gold (between copper and gold)
+
+ENT_C  = [NAVY_LT, COPPER]
+FIX_C  = {"M-1": NAVY_LT, "3M-1": COPPER, "3M-2": TEAL}
 MONTH_ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
 LAY = dict(
-    paper_bgcolor=NAVY, plot_bgcolor="#090e1c",
-    font=dict(color="#4a6080", family="Inter", size=12),
+    paper_bgcolor=NAVY, plot_bgcolor="#0d1730",
+    font=dict(color=SLATE, family="Inter", size=12),
     margin=dict(t=55, b=45, l=60, r=25),
-    legend=dict(bgcolor="rgba(13,30,58,0.95)", bordercolor="rgba(184,115,51,0.2)",
-                borderwidth=1, font=dict(color=SLATE, size=11)),
-    xaxis=dict(gridcolor="rgba(255,255,255,0.03)", zeroline=False,
-               tickfont=dict(color="#3a5070", size=11), linecolor="rgba(255,255,255,0.04)"),
-    yaxis=dict(gridcolor="rgba(255,255,255,0.03)", zeroline=False,
-               tickfont=dict(color="#3a5070", size=11), linecolor="rgba(255,255,255,0.04)"),
+    legend=dict(bgcolor="rgba(15,27,61,0.97)", bordercolor="rgba(139,94,60,0.25)",
+                borderwidth=1, font=dict(color=ICE, size=11)),
+    xaxis=dict(gridcolor="rgba(255,255,255,0.04)", zeroline=False,
+               tickfont=dict(color=SLATE, size=11), linecolor="rgba(255,255,255,0.05)"),
+    yaxis=dict(gridcolor="rgba(255,255,255,0.04)", zeroline=False,
+               tickfont=dict(color=SLATE, size=11), linecolor="rgba(255,255,255,0.05)"),
     title_font=dict(color=COP_LT, size=13, family="Inter"),
-    hoverlabel=dict(bgcolor=NAVY_MD, bordercolor="rgba(184,115,51,0.35)",
-                    font=dict(color=ICE, size=12)),
+    hoverlabel=dict(bgcolor=NAVY_MD, bordercolor="rgba(139,94,60,0.4)",
+                    font=dict(color=WHITE, size=12)),
 )
 
 # ── LOAD DATA — new clean CSV ──
@@ -899,4 +912,3 @@ with tab7:
                         text_auto=".2s", labels={"Revenue":"Revenue (€)","MONTH_NAME":"Month"})
         alay(fig_em)
         st.plotly_chart(fig_em, use_container_width=True)
-
