@@ -94,13 +94,16 @@ LAY = dict(
 # ── LOAD DATA — new clean CSV ──
 @st.cache_data(ttl=3600)
 def load_data():
-    import os
-    # Try all possible filenames
-    for fname in ["lme_data.csv", "lme_data_final.csv", "lme_dashboard_data.csv"]:
+    import os, glob
+    # Find any CSV in the repo
+    candidates = glob.glob("*.csv") + glob.glob("**/*.csv", recursive=False)
+    st.sidebar.caption(f"📂 Files found: {candidates}")
+    
+    for fname in ["lme_data.csv", "lme_data_final.csv", "lme_dashboard_data.csv"] + candidates:
         if os.path.exists(fname):
             df = pd.read_csv(fname, encoding="utf-8")
-            df.columns = df.columns.str.strip()
-            # Normalize old column names if needed
+            df.columns = df.columns.str.strip().str.lstrip("\ufeff")
+            # Normalize ALL possible old column names
             rename_map = {
                 "ENTITIES":"ENTITY","Month Name":"MONTH_NAME","Month":"MONTH",
                 "QTY Km":"QTY_KM","RC Needs Kg":"RC_KG","CC Needs Kg":"CC_KG",
@@ -110,12 +113,18 @@ def load_data():
                 "Fixation":"FIXATION","SPOOL TYPE":"SPOOL_TYPE","LME PROJECTS":"LME_PROJECTS",
                 "CROSS SECTION mm":"CROSS_SECTION_MM","FAMILY & CS":"FAMILY_CS",
                 "QTY_Km":"QTY_KM","RC_Needs_Kg":"RC_KG","CC_Needs_Kg":"CC_KG",
-                "ES_mm":"ES_MM","AV_INDEX":"AV_INDEX","TOTAL_AMOUNT":"TOTAL_AMOUNT",
+                "ES_mm":"ES_MM","TOTAL_AMOUNT":"TOTAL_AMOUNT",
                 "LME_SALES_avg":"LME_SALES","BASIC_LME_avg":"BASIC_LME",
             }
             df = df.rename(columns={k:v for k,v in rename_map.items() if k in df.columns})
+            
+            # Fix ENTITY: if it contains commas it's the old broken column — rebuild from scratch
+            if "ENTITY" in df.columns:
+                df["ENTITY"] = df["ENTITY"].astype(str).str.split(",").str[0].str.strip()
+            
+            st.sidebar.caption(f"✅ Loaded: {fname} | ENTITY: {df['ENTITY'].unique().tolist() if 'ENTITY' in df.columns else 'missing'}")
             return df
-    st.error("❌ Data file not found. Please upload lme_data.csv to the repository.")
+    st.error("❌ No CSV data file found in repository.")
     st.stop()
 
 df_raw = load_data()
