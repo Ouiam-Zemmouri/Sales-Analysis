@@ -94,9 +94,29 @@ LAY = dict(
 # ── LOAD DATA — new clean CSV ──
 @st.cache_data(ttl=3600)
 def load_data():
-    df = pd.read_csv("lme_data.csv", encoding="utf-8")
-    df.columns = df.columns.str.strip()
-    return df
+    import os
+    # Try all possible filenames
+    for fname in ["lme_data.csv", "lme_data_final.csv", "lme_dashboard_data.csv"]:
+        if os.path.exists(fname):
+            df = pd.read_csv(fname, encoding="utf-8")
+            df.columns = df.columns.str.strip()
+            # Normalize old column names if needed
+            rename_map = {
+                "ENTITIES":"ENTITY","Month Name":"MONTH_NAME","Month":"MONTH",
+                "QTY Km":"QTY_KM","RC Needs Kg":"RC_KG","CC Needs Kg":"CC_KG",
+                "ES mm":"ES_MM","AV INDEX":"AV_INDEX","TOTAL AMOUNT €":"TOTAL_AMOUNT",
+                "LME SALES €/kg":"LME_SALES","BASIC LME  €/kg":"BASIC_LME",
+                "UNIT PRICE €/km":"UNIT_PRICE","ADDED VALUE €/km":"ADDED_VALUE",
+                "Fixation":"FIXATION","SPOOL TYPE":"SPOOL_TYPE","LME PROJECTS":"LME_PROJECTS",
+                "CROSS SECTION mm":"CROSS_SECTION_MM","FAMILY & CS":"FAMILY_CS",
+                "QTY_Km":"QTY_KM","RC_Needs_Kg":"RC_KG","CC_Needs_Kg":"CC_KG",
+                "ES_mm":"ES_MM","AV_INDEX":"AV_INDEX","TOTAL_AMOUNT":"TOTAL_AMOUNT",
+                "LME_SALES_avg":"LME_SALES","BASIC_LME_avg":"BASIC_LME",
+            }
+            df = df.rename(columns={k:v for k,v in rename_map.items() if k in df.columns})
+            return df
+    st.error("❌ Data file not found. Please upload lme_data.csv to the repository.")
+    st.stop()
 
 df_raw = load_data()
 
@@ -495,4 +515,5 @@ st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
   LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
+
 
