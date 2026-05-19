@@ -256,10 +256,10 @@ def alay(fig, **kw):
 
 # ── TITLE ──
 st.markdown("""<div class="title-banner">
-  <h1>⚡ Sales Analysis 2026</h1>
+  <h1>Sales Analysis 2026</h1>
   <p>COFICAB Kenitra · COFICAB Maroc</p>
 </div>""", unsafe_allow_html=True)
-st.caption(f"📊 **{len(df):,}** records · **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
+st.caption(f"📊 **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
 
 tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
     "📊 KPI Summary","📈 LME Overview","🏭 Fixation Analysis","🔬 Deep Dive",
