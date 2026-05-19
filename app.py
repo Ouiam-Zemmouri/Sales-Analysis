@@ -195,15 +195,16 @@ with st.sidebar:
         mn, mx = float(s.min()), float(s.max())
         if mn == mx: mx += 0.001
         st.markdown(f'<p class="filter-label">{label}</p>', unsafe_allow_html=True)
-        return st.slider("", mn, mx, (mn, mx), key=f"sld_{col}", label_visibility="collapsed")
+        return st.slider("", mn, mx, (mn, mx), key=f"sld_{col}",
+                         label_visibility="collapsed", format="%.4f")
 
-    f_lme   = dyn_slider("LME Sales €/kg",  "LME_SALES",  df_pre)
-    f_basic = dyn_slider("Basic LME €/kg",  "BASIC_LME",  df_pre)
+    f_lme   = dyn_slider("LME Sales (€/kg)",  "LME_SALES",  df_pre)
+    f_basic = dyn_slider("Basic LME (€/kg)",  "BASIC_LME",  df_pre)
     st.markdown("---")
 
 # ── FULL FILTER ──
 df = df_pre[
-    df_pre["LME_SALES"].between(f_lme[0],   f_lme[1])   &
+    df_pre["LME_SALES"].between(f_lme[0],   f_lme[1]) &
     df_pre["BASIC_LME"].between(f_basic[0], f_basic[1])
 ].copy()
 
