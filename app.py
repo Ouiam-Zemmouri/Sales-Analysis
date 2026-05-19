@@ -240,7 +240,7 @@ tab1,tab2,tab3,tab4,tab5 = st.tabs([
 with tab1:
     sec("📊","Global Performance Indicators")
     c1,c2,c3,c4,c5 = st.columns(5)
-    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",   "EUR",         COPPER)
+    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",            COPPER)
     kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M",    "km",          BLUE)
     kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}",       "Tonnes",      TEAL)
     kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}",       "€/kg",        COP_LT)
