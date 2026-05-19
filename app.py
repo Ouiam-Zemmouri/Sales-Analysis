@@ -212,12 +212,10 @@ fix_agg = df.groupby("FIXATION").agg(
     Tonnage_T=("RC_KG",lambda x:x.sum()/1000),
     Qty_Km=("QTY_KM","sum"), CA=("TOTAL_AMOUNT","sum")).reset_index()
 
-def kpi(col, label, val, unit, color=COPPER):
+def kpi(col, label, val, unit=None, color=COPPER):
     col.markdown(f"""<div class="kpi-card" style="border-left-color:{color};">
-      <div class="kpi-label">{label}</div>
-      <div class="kpi-unit" style="color:{color};opacity:0.45;font-size:0.65rem;font-weight:700;
-           letter-spacing:2px;margin-bottom:4px;">{unit}</div>
-      <div class="kpi-value" style="color:{color};">{val}</div>
+      <div class="kpi-label" style="color:{color};">{label}</div>
+      <div class="kpi-value" style="color:#e8edf5;">{val}</div>
       </div>""", unsafe_allow_html=True)
 
 def sec(icon, title):
@@ -281,16 +279,16 @@ with tab1:
 
     sec("📐","Cross Section Summary by Entity")
     es_ent = df.groupby("ENTITY").apply(lambda g: pd.Series({
-        "Total ES mm":      g["ES_MM"].sum(),
-        "Total Qty (km)":   g["QTY_KM"].sum(),
-        "Avg Cross Sect.":  g["ES_MM"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
-        "Avg RC kg/km":     g["RC_KG"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
-        "Avg CC kg/km":     g["CC_KG"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
-        "Avg AV €/km":      g["AV_INDEX"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
+        "Total Qty (km)":        g["QTY_KM"].sum(),
+        "Avg Cross Section (mm)":g["ES_MM"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
+        "Avg RC (kg/km)":        g["RC_KG"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
+        "Avg CC (kg/km)":        g["CC_KG"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
+        "Avg Added Value (€/km)":g["AV_INDEX"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
     })).reset_index()
     st.dataframe(es_ent.style
-        .format({"Total ES mm":"{:,.3f}","Total Qty (km)":"{:,.2f}","Avg Cross Sect.":"{:.3f}",
-                 "Avg RC kg/km":"{:.3f}","Avg CC kg/km":"{:.3f}","Avg AV €/km":"€{:.2f}"})
+        .format({"Total Qty (km)":"{:,.2f}","Avg Cross Section (mm)":"{:.2f}",
+                 "Avg RC (kg/km)":"{:.2f}","Avg CC (kg/km)":"{:.2f}",
+                 "Avg Added Value (€/km)":"€{:.2f}"})
         .set_properties(**{"background-color":NAVY_MD,"color":ICE}),
         use_container_width=True, hide_index=True)
 
@@ -412,13 +410,15 @@ with tab3:
     for i,row in fix_agg.iterrows():
         pct=row["Qty_Km"]/TQ*100 if TQ else 0; cc=fix_kc[i%len(fix_kc)]
         fcols[i].markdown(f"""<div class="kpi-card" style="border-left-color:{cc};">
-          <div class="kpi-label">{row['FIXATION']}</div>
-          <div class="kpi-value" style="color:{cc};">{row['Tonnage_T']:,.1f} T</div>
-          <div class="kpi-sub">{row['Qty_Km']:,.0f} km · {pct:.1f}%</div></div>""",unsafe_allow_html=True)
+          <div class="kpi-label" style="color:{cc};">{row['FIXATION']}</div>
+          <div class="kpi-value" style="color:#e8edf5;">{row['Tonnage_T']:,.0f}</div>
+          <div class="kpi-sub" style="color:{cc};opacity:0.6;font-size:0.65rem;">{row['Qty_Km']:,.0f} km · {pct:.1f}%</div>
+          </div>""",unsafe_allow_html=True)
     fcols[-1].markdown(f"""<div class="kpi-card" style="border-left-color:{GOLD};">
-      <div class="kpi-label">⚡ TOTAL</div>
-      <div class="kpi-value" style="color:{GOLD};">{TON:,.1f} T</div>
-      <div class="kpi-sub">{TQ:,.0f} km · 100%</div></div>""",unsafe_allow_html=True)
+      <div class="kpi-label" style="color:{GOLD};">⚡ TOTAL</div>
+      <div class="kpi-value" style="color:#e8edf5;">{TON:,.0f}</div>
+      <div class="kpi-sub" style="color:{GOLD};opacity:0.6;font-size:0.65rem;">{TQ:,.0f} km · 100%</div>
+      </div>""",unsafe_allow_html=True)
 
     st.markdown("<br>",unsafe_allow_html=True)
     colA,colB,colC = st.columns(3)
@@ -450,8 +450,8 @@ with tab3:
         "Volume (km)":round(TQ,2),"Revenue (€)":round(TCA,2),
         "Avg All-In LME":round(ALM,4),"Avg Basic LME":round(BLM,4)}])],ignore_index=True)
     st.dataframe(fs.style
-        .format({"Tonnage (T)":"{:,.2f}","Volume (km)":"{:,.2f}","Revenue (€)":"€{:,.2f}",
-                 "Avg All-In LME":"{:.4f}","Avg Basic LME":"{:.4f}"})
+        .format({"Tonnage (T)":"{:,.0f}","Volume (km)":"{:,.0f}","Revenue (€)":"€{:,.2f}",
+                 "Avg All-In LME":"{:.2f}","Avg Basic LME":"{:.2f}"})
         .set_properties(**{"background-color":NAVY_MD,"color":ICE}),
         use_container_width=True,hide_index=True)
 
@@ -485,8 +485,8 @@ with tab4:
             Avg_LME=("LME_SALES","mean"),Avg_Basic=("BASIC_LME","mean")).reset_index().sort_values("CA",ascending=False)
         fd2.columns=[dim_lbl,"Revenue (€)","Volume (km)","Tonnage (T)","Avg All-In LME","Avg Basic LME"]
         st.dataframe(fd2.style
-            .format({"Revenue (€)":"€{:,.0f}","Volume (km)":"{:,.1f}","Tonnage (T)":"{:,.1f}",
-                     "Avg All-In LME":"{:.4f}","Avg Basic LME":"{:.4f}"})
+            .format({"Revenue (€)":"€{:,.2f}","Volume (km)":"{:,.0f}","Tonnage (T)":"{:,.0f}",
+                     "Avg All-In LME":"{:.2f}","Avg Basic LME":"{:.2f}"})
             .set_properties(**{"background-color":NAVY_MD,"color":ICE}),
             use_container_width=True,hide_index=True,height=400)
 
