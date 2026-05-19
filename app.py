@@ -171,14 +171,12 @@ with st.sidebar:
     f_fix    = mf("Fixation",       "FIXATION")
     f_spool  = mf("Spool Type",     "SPOOL_TYPE")
     f_lmeprj = mf("LME Projects",   "LME_PROJECTS")
-    f_lme    = ms("LME Sales €/kg", "LME_SALES")
-    f_basic  = ms("Basic LME €/kg", "BASIC_LME")
     st.markdown("---")
 
-# ── FILTER ──
+# ── PRE-FILTER (without LME sliders) to compute dynamic ranges ──
 def ins(s,v): return s.astype(str).isin([str(x) for x in v])
 
-df = df_raw[
+df_pre = df_raw[
     ins(df_raw["ENTITY"],       f_entity)  &
     ins(df_raw["MONTH_NAME"],   f_month)   &
     ins(df_raw["RM"],           f_rm)      &
@@ -186,9 +184,27 @@ df = df_raw[
     ins(df_raw["GROUPS"],       f_group)   &
     ins(df_raw["FIXATION"],     f_fix)     &
     ins(df_raw["SPOOL_TYPE"],   f_spool)   &
-    ins(df_raw["LME_PROJECTS"], f_lmeprj)  &
-    df_raw["LME_SALES"].between(f_lme[0],   f_lme[1])   &
-    df_raw["BASIC_LME"].between(f_basic[0], f_basic[1])
+    ins(df_raw["LME_PROJECTS"], f_lmeprj)
+].copy()
+
+# ── DYNAMIC SLIDERS based on pre-filtered data ──
+with st.sidebar:
+    def dyn_slider(label, col, data):
+        s = data[col].dropna()
+        if s.empty: return (0.0, 1.0)
+        mn, mx = float(s.min()), float(s.max())
+        if mn == mx: mx += 0.001
+        st.markdown(f'<p class="filter-label">{label}</p>', unsafe_allow_html=True)
+        return st.slider("", mn, mx, (mn, mx), key=f"sld_{col}", label_visibility="collapsed")
+
+    f_lme   = dyn_slider("LME Sales €/kg",  "LME_SALES",  df_pre)
+    f_basic = dyn_slider("Basic LME €/kg",  "BASIC_LME",  df_pre)
+    st.markdown("---")
+
+# ── FULL FILTER ──
+df = df_pre[
+    df_pre["LME_SALES"].between(f_lme[0],   f_lme[1])   &
+    df_pre["BASIC_LME"].between(f_basic[0], f_basic[1])
 ].copy()
 
 if df.empty:
@@ -882,4 +898,3 @@ with tab7:
                         text_auto=".2s", labels={"Revenue":"Revenue (€)","MONTH_NAME":"Month"})
         alay(fig_em)
         st.plotly_chart(fig_em, use_container_width=True)
-
