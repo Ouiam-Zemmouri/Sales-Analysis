@@ -719,8 +719,7 @@ with tab6:
         texttemplate="%{text}",
         textfont=dict(color=WHITE, size=10),
         hoverongaps=False,
-        colorbar=dict(title="Revenue (M€)", tickfont=dict(color=SLATE),
-                      titlefont=dict(color=SLATE))))
+        colorbar=dict(title="Revenue (M€)", tickfont=dict(color=SLATE))))
     alay(fig_hm, title="Revenue (M€) — Customer Groups × Months", height=600,
          xaxis=dict(tickfont=dict(color=ICE, size=12)),
          yaxis=dict(tickfont=dict(color=ICE, size=10)))
@@ -802,7 +801,7 @@ with tab7:
                         line=dict(width=2, color="rgba(255,255,255,0.2)")),
             text=[f"{v:.2f}" for v in y],
             textposition="top center", textfont=dict(size=9, color=color),
-            fill="tozeroy", fillcolor=f"rgba{tuple(list(bytes.fromhex(color.lstrip('#'))) + [25])}"),
+            fill="tozeroy", fillcolor=f"rgba(43,108,176,0.07)"),
             row=row, col=col)
 
     sparkline(scorecard["MONTH_NAME"], scorecard["Revenue"]/1e6,   COPPER, 1, 1, "Revenue")
@@ -839,7 +838,7 @@ with tab7:
                  "Added Value (€/km)":"€{:.2f}","Rev Share (%)":"{:.1f}%",
                  "MoM Growth (%)":"{:+.1f}%"})
         .set_properties(**{"background-color":NAVY_MD,"color":ICE})
-        .applymap(lambda v: f"color: {'#10b981' if isinstance(v,float) and v>0 else '#f43f5e' if isinstance(v,float) and v<0 else ICE}",
+        .map(lambda v: f"color: #10b981" if isinstance(v, float) and v > 0 else (f"color: #f43f5e" if isinstance(v, float) and v < 0 else ""),
                   subset=["MoM Growth (%)"]),
         use_container_width=True, hide_index=True)
 
@@ -883,3 +882,4 @@ with tab7:
                         text_auto=".2s", labels={"Revenue":"Revenue (€)","MONTH_NAME":"Month"})
         alay(fig_em)
         st.plotly_chart(fig_em, use_container_width=True)
+
