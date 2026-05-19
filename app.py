@@ -134,7 +134,6 @@ with st.sidebar:
                     filter:drop-shadow(0 4px 14px rgba(184,115,51,0.25));"/>
     </div>""", unsafe_allow_html=True)
     st.markdown("---")
-        st.cache_data.clear()
         st.rerun()
     st.markdown("## 🔍 Filters")
 
