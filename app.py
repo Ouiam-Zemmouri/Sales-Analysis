@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="LME Sales Analysis 2026",
+    page_title="Sales Analysis 2026",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -226,13 +226,14 @@ def alay(fig, **kw):
 
 # ── TITLE ──
 st.markdown("""<div class="title-banner">
-  <h1>⚡ LME Sales Analysis 2026</h1>
+  <h1>⚡ Sales Analysis 2026</h1>
   <p>COFICAB Kenitra · COFICAB Maroc</p>
 </div>""", unsafe_allow_html=True)
 st.caption(f"📊 **{len(df):,}** records · **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
 
-tab1,tab2,tab3,tab4,tab5 = st.tabs([
-    "📊 KPI Summary","📈 LME Overview","🏭 Fixation Analysis","🔬 Deep Dive","📋 Raw Data"])
+tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8 = st.tabs([
+    "📊 KPI Summary","📈 LME Overview","🏭 Fixation Analysis","🔬 Deep Dive",
+    "💰 Profitability","🌍 Customer Portfolio","🎯 Executive Summary","📋 Raw Data"])
 
 # ════ TAB 1 ════
 with tab1:
@@ -507,9 +508,9 @@ with tab4:
                  title="Volume (km) by Spool Type & Entity",
                  color_discrete_sequence=ENT_C,labels={"Qty_Km":"Volume (km)"})
     alay(figsp); st.plotly_chart(figsp,use_container_width=True)
-    
-# ════ TAB 5 ════
-with tab5:
+
+# ════ TAB 8 ════
+with tab8:
     sec("📋","Filtered Dataset")
     search=st.text_input("","",placeholder="🔍  Search across all columns...",label_visibility="collapsed")
     cols_sel=st.multiselect("Select columns",list(df.columns),default=list(df.columns))
@@ -526,3 +527,359 @@ st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
   LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
+
+# ════════════════════════════════════════════
+# TAB 5 — PROFITABILITY ANALYSIS
+# ════════════════════════════════════════════
+with tab5:
+    sec("💰","Profitability Analysis")
+
+    # ── KPIs
+    spread_avg = ALM - BLM
+    av_total   = df["AV_INDEX"].sum()
+    av_per_km  = AAV
+    rev_per_ton= TCA / TON if TON else 0
+
+    c1,c2,c3,c4 = st.columns(4)
+    kpi(c1,"Avg Spread All-In vs Basic (€/kg)", f"{spread_avg:.2f}", "€/kg", COPPER)
+    kpi(c2,"Total Added Value (€)",             f"€{av_total/1e6:.2f}M",  "EUR",  BLUE)
+    kpi(c3,"Avg Added Value (€/km)",            f"{av_per_km:.2f}",       "€/km", TEAL)
+    kpi(c4,"Revenue per Tonne (€/T)",           f"€{rev_per_ton:,.0f}",   "€/T",  GOLD)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Spread evolution by month
+    sec("📉","LME Spread (All-In vs Basic) — Monthly Evolution")
+    spread_m = df.groupby(["MONTH","MONTH_NAME"]).agg(
+        Spread=("LME_SALES","mean"), Basic=("BASIC_LME","mean")).reset_index()
+    spread_m["Spread_diff"] = spread_m["Spread"] - spread_m["Basic"]
+    spread_m["MONTH_NAME"]  = pd.Categorical(spread_m["MONTH_NAME"], categories=MONTH_ORDER, ordered=True)
+    spread_m = spread_m.sort_values("MONTH_NAME")
+
+    fig_sp = go.Figure()
+    fig_sp.add_trace(go.Bar(
+        x=spread_m["MONTH_NAME"], y=spread_m["Spread_diff"],
+        name="Spread (All-In − Basic)",
+        marker=dict(color=[COPPER if v>=0 else "#f43f5e" for v in spread_m["Spread_diff"]],
+                    opacity=0.9, line=dict(width=1)),
+        text=[f"{v:.2f}" for v in spread_m["Spread_diff"]],
+        textposition="outside", textfont=dict(color=ICE, size=11)))
+    fig_sp.add_trace(go.Scatter(
+        x=spread_m["MONTH_NAME"], y=spread_m["Spread_diff"],
+        mode="lines+markers", name="Trend",
+        line=dict(color=BLUE, width=2, dash="dot"),
+        marker=dict(size=8, color=BLUE)))
+    alay(fig_sp, title="Monthly LME Spread (All-In − Basic €/kg)", height=380)
+    st.plotly_chart(fig_sp, use_container_width=True)
+
+    # ── Added Value by Group & Entity
+    sec("📊","Added Value (€/km) by Customer Group & Entity")
+    cl, cr = st.columns(2)
+
+    with cl:
+        av_group = df.groupby("GROUPS").agg(
+            AV_km=("AV_INDEX","sum"), QTY=("QTY_KM","sum"),
+            CA=("TOTAL_AMOUNT","sum")).reset_index()
+        av_group["AV_per_km"] = av_group["AV_km"] / av_group["QTY"]
+        av_group = av_group.sort_values("AV_per_km", ascending=True).tail(15)
+
+        fig_av = go.Figure(go.Bar(
+            x=av_group["AV_per_km"], y=av_group["GROUPS"],
+            orientation="h",
+            marker=dict(
+                color=av_group["AV_per_km"],
+                colorscale=[[0,NAVY_MD],[0.5,BLUE],[1,COPPER]],
+                showscale=False, line=dict(width=0)),
+            text=[f"€{v:.2f}" for v in av_group["AV_per_km"]],
+            textposition="outside", textfont=dict(color=ICE, size=10)))
+        alay(fig_av, title="Added Value (€/km) — Top 15 Customer Groups", height=450,
+             xaxis=dict(title="€/km", gridcolor="rgba(255,255,255,0.03)",
+                        tickfont=dict(color="#3a5070")),
+             yaxis=dict(tickfont=dict(color=ICE, size=10), gridcolor="rgba(255,255,255,0.02)"))
+        st.plotly_chart(fig_av, use_container_width=True)
+
+    with cr:
+        av_fam = df.groupby("FAMILY").agg(
+            AV_km=("AV_INDEX","sum"), QTY=("QTY_KM","sum")).reset_index()
+        av_fam["AV_per_km"] = av_fam["AV_km"] / av_fam["QTY"]
+        av_fam = av_fam.sort_values("AV_per_km", ascending=False).head(15)
+
+        fig_avf = px.bar(av_fam, x="FAMILY", y="AV_per_km",
+            title="Added Value (€/km) — Top 15 Product Families",
+            color="AV_per_km",
+            color_continuous_scale=[NAVY_MD, BLUE, COPPER],
+            text_auto=".2f", labels={"AV_per_km":"€/km"})
+        alay(fig_avf, coloraxis_showscale=False, xaxis_tickangle=-45)
+        st.plotly_chart(fig_avf, use_container_width=True)
+
+    # ── Profitability by Fixation × Month
+    sec("🔧","Spread & Added Value by Fixation Type")
+    fix_prof = df.groupby(["MONTH_NAME","FIXATION"]).agg(
+        LME=("LME_SALES","mean"), Basic=("BASIC_LME","mean"),
+        AV=("AV_INDEX","sum"), QTY=("QTY_KM","sum")).reset_index()
+    fix_prof["Spread"]   = fix_prof["LME"] - fix_prof["Basic"]
+    fix_prof["AV_km"]    = fix_prof["AV"] / fix_prof["QTY"]
+    fix_prof["MONTH_NAME"] = pd.Categorical(fix_prof["MONTH_NAME"], categories=MONTH_ORDER, ordered=True)
+    fix_prof = fix_prof.sort_values("MONTH_NAME")
+
+    cl2, cr2 = st.columns(2)
+    with cl2:
+        fig_fsp = go.Figure()
+        for fix, grp in fix_prof.groupby("FIXATION"):
+            cc = FIX_C.get(fix, SLATE)
+            fig_fsp.add_trace(go.Scatter(
+                x=grp["MONTH_NAME"], y=grp["Spread"],
+                mode="lines+markers+text", name=fix,
+                line=dict(color=cc, width=2.5),
+                marker=dict(size=9, color=cc),
+                text=[f"{v:.2f}" for v in grp["Spread"]],
+                textposition="top center", textfont=dict(size=9, color=cc)))
+        alay(fig_fsp, title="LME Spread (€/kg) by Fixation Type")
+        st.plotly_chart(fig_fsp, use_container_width=True)
+
+    with cr2:
+        fig_favk = go.Figure()
+        for fix, grp in fix_prof.groupby("FIXATION"):
+            cc = FIX_C.get(fix, SLATE)
+            fig_favk.add_trace(go.Scatter(
+                x=grp["MONTH_NAME"], y=grp["AV_km"],
+                mode="lines+markers+text", name=fix,
+                line=dict(color=cc, width=2.5),
+                marker=dict(size=9, color=cc),
+                text=[f"{v:.2f}" for v in grp["AV_km"]],
+                textposition="top center", textfont=dict(size=9, color=cc)))
+        alay(fig_favk, title="Added Value (€/km) by Fixation Type")
+        st.plotly_chart(fig_favk, use_container_width=True)
+
+
+# ════════════════════════════════════════════
+# TAB 6 — CUSTOMER PORTFOLIO
+# ════════════════════════════════════════════
+with tab6:
+    sec("🌍","Customer Portfolio Analysis")
+
+    # ── Pareto 80/20
+    sec("📊","Pareto Analysis — Revenue Concentration")
+    pareto = df.groupby("GROUPS").agg(
+        CA=("TOTAL_AMOUNT","sum"), Qty=("QTY_KM","sum"),
+        Tonnage=("RC_KG",lambda x:x.sum()/1000)).reset_index()
+    pareto = pareto.sort_values("CA", ascending=False).reset_index(drop=True)
+    pareto["CA_cum_pct"] = pareto["CA"].cumsum() / pareto["CA"].sum() * 100
+    pareto["CA_pct"]     = pareto["CA"] / pareto["CA"].sum() * 100
+    pareto["Rank"]       = pareto.index + 1
+
+    fig_par = go.Figure()
+    fig_par.add_trace(go.Bar(
+        x=pareto["GROUPS"], y=pareto["CA_pct"],
+        name="Revenue Share (%)",
+        marker=dict(
+            color=pareto["CA_pct"],
+            colorscale=[[0,NAVY_LT],[0.4,BLUE],[1,COPPER]],
+            showscale=False, line=dict(width=0)),
+        text=[f"{v:.1f}%" for v in pareto["CA_pct"]],
+        textposition="outside", textfont=dict(color=ICE, size=9)))
+    fig_par.add_trace(go.Scatter(
+        x=pareto["GROUPS"], y=pareto["CA_cum_pct"],
+        name="Cumulative %", yaxis="y2",
+        mode="lines+markers",
+        line=dict(color=COPPER, width=2.5),
+        marker=dict(size=7, color=COPPER)))
+    alay(fig_par,
+        title="Customer Revenue Concentration — Pareto Analysis",
+        height=450,
+        yaxis=dict(title="Revenue Share (%)", gridcolor="rgba(255,255,255,0.03)",
+                   tickfont=dict(color="#3a5070")),
+        yaxis2=dict(title="Cumulative %", overlaying="y", side="right",
+                    range=[0,105], ticksuffix="%",
+                    gridcolor="rgba(0,0,0,0)", tickfont=dict(color=COPPER)),
+        xaxis=dict(tickangle=-35, tickfont=dict(color=SLATE, size=10)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+    # Add 80% reference line
+    fig_par.add_hline(y=80, yref="y2", line_dash="dash",
+                      line_color="rgba(244,63,94,0.6)", line_width=1.5,
+                      annotation_text="80%", annotation_font_color="#f43f5e")
+    st.plotly_chart(fig_par, use_container_width=True)
+
+    # ── Heatmap customers × months
+    sec("🌡️","Revenue Heatmap — Customer Groups × Months")
+    hmap = df.groupby(["GROUPS","MONTH_NAME"]).agg(CA=("TOTAL_AMOUNT","sum")).reset_index()
+    hmap_pivot = hmap.pivot(index="GROUPS", columns="MONTH_NAME", values="CA").fillna(0)
+    # Sort months
+    cols_sorted = [m for m in MONTH_ORDER if m in hmap_pivot.columns]
+    hmap_pivot  = hmap_pivot[cols_sorted]
+    # Sort groups by total
+    hmap_pivot  = hmap_pivot.loc[hmap_pivot.sum(axis=1).sort_values(ascending=False).index]
+
+    fig_hm = go.Figure(go.Heatmap(
+        z=hmap_pivot.values / 1e6,
+        x=hmap_pivot.columns.tolist(),
+        y=hmap_pivot.index.tolist(),
+        colorscale=[[0,NAVY_MD],[0.3,NAVY_LT],[0.6,BLUE],[1,COPPER]],
+        text=[[f"€{v:.2f}M" for v in row] for row in hmap_pivot.values/1e6],
+        texttemplate="%{text}",
+        textfont=dict(color=WHITE, size=10),
+        hoverongaps=False,
+        colorbar=dict(title="Revenue (M€)", tickfont=dict(color=SLATE),
+                      titlefont=dict(color=SLATE))))
+    alay(fig_hm, title="Revenue (M€) — Customer Groups × Months", height=600,
+         xaxis=dict(tickfont=dict(color=ICE, size=12)),
+         yaxis=dict(tickfont=dict(color=ICE, size=10)))
+    st.plotly_chart(fig_hm, use_container_width=True)
+
+    # ── Customer ranking table
+    sec("🏆","Customer Ranking — Full Scorecard")
+    rank = df.groupby("GROUPS").agg(
+        Revenue=("TOTAL_AMOUNT","sum"),
+        Volume_km=("QTY_KM","sum"),
+        Tonnage_T=("RC_KG",lambda x:x.sum()/1000),
+        Avg_LME=("LME_SALES","mean"),
+        Avg_Basic=("BASIC_LME","mean"),
+        Avg_AV=("AV_INDEX",lambda x: x.sum()/df.loc[x.index,"QTY_KM"].sum()
+                if df.loc[x.index,"QTY_KM"].sum() else 0),
+    ).reset_index().sort_values("Revenue", ascending=False).reset_index(drop=True)
+    rank.index = rank.index + 1
+    rank["Revenue Share (%)"] = (rank["Revenue"] / rank["Revenue"].sum() * 100).round(1)
+    rank["Spread (€/kg)"]     = (rank["Avg_LME"] - rank["Avg_Basic"]).round(2)
+    rank = rank.rename(columns={
+        "GROUPS":"Customer Group","Revenue":"Revenue (€)","Volume_km":"Volume (km)",
+        "Tonnage_T":"Tonnage (T)","Avg_LME":"Avg All-In LME","Avg_Basic":"Avg Basic LME",
+        "Avg_AV":"Avg AV (€/km)"})
+    st.dataframe(rank[[
+        "Customer Group","Revenue (€)","Revenue Share (%)","Volume (km)",
+        "Tonnage (T)","Avg All-In LME","Avg Basic LME","Spread (€/kg)","Avg AV (€/km)"
+    ]].style
+        .format({"Revenue (€)":"€{:,.0f}","Revenue Share (%)":"{:.1f}%",
+                 "Volume (km)":"{:,.0f}","Tonnage (T)":"{:,.0f}",
+                 "Avg All-In LME":"{:.2f}","Avg Basic LME":"{:.2f}",
+                 "Spread (€/kg)":"{:.2f}","Avg AV (€/km)":"€{:.2f}"})
+        .set_properties(**{"background-color":NAVY_MD,"color":ICE})
+        .bar(subset=["Revenue Share (%)"], color="rgba(184,115,51,0.3)"),
+        use_container_width=True, height=500)
+
+
+# ════════════════════════════════════════════
+# TAB 7 — EXECUTIVE SUMMARY
+# ════════════════════════════════════════════
+with tab7:
+    sec("🎯","Executive Summary — Sales Performance 2026")
+
+    # ── Monthly scorecard
+    scorecard = df.groupby(["MONTH","MONTH_NAME"]).agg(
+        Revenue=("TOTAL_AMOUNT","sum"),
+        Volume=("QTY_KM","sum"),
+        Tonnage=("RC_KG",lambda x:x.sum()/1000),
+        LME=("LME_SALES","mean"),
+        Basic=("BASIC_LME","mean"),
+        AV=("AV_INDEX","sum"),
+        QTY=("QTY_KM","sum"),
+    ).reset_index()
+    scorecard["Spread"]     = scorecard["LME"] - scorecard["Basic"]
+    scorecard["AV_km"]      = scorecard["AV"] / scorecard["QTY"]
+    scorecard["Rev_share"]  = scorecard["Revenue"] / scorecard["Revenue"].sum() * 100
+    scorecard["MONTH_NAME"] = pd.Categorical(scorecard["MONTH_NAME"], categories=MONTH_ORDER, ordered=True)
+    scorecard = scorecard.sort_values("MONTH_NAME")
+
+    # ── 4 sparkline KPIs
+    sec("📅","Monthly Scorecard")
+    fig_sc = go.Figure()
+    metrics = [
+        ("Revenue (M€)",  scorecard["Revenue"]/1e6,   COPPER, "y1"),
+        ("Volume (Mkm)",  scorecard["Volume"]/1e6,    BLUE,   "y2"),
+        ("LME (€/kg)",    scorecard["LME"],           TEAL,   "y3"),
+        ("Spread (€/kg)", scorecard["Spread"],        GOLD,   "y4"),
+    ]
+    # Use subplots via make_subplots for clean sparklines
+    from plotly.subplots import make_subplots
+    fig_sc = make_subplots(rows=2, cols=2,
+        subplot_titles=["Revenue (M€)","Volume (M km)","All-In LME (€/kg)","LME Spread (€/kg)"],
+        vertical_spacing=0.18, horizontal_spacing=0.1)
+
+    def sparkline(x, y, color, row, col, name):
+        fig_sc.add_trace(go.Scatter(
+            x=x, y=y, mode="lines+markers+text", name=name,
+            line=dict(color=color, width=3),
+            marker=dict(size=10, color=color,
+                        line=dict(width=2, color="rgba(255,255,255,0.2)")),
+            text=[f"{v:.2f}" for v in y],
+            textposition="top center", textfont=dict(size=9, color=color),
+            fill="tozeroy", fillcolor=f"rgba{tuple(list(bytes.fromhex(color.lstrip('#'))) + [25])}"),
+            row=row, col=col)
+
+    sparkline(scorecard["MONTH_NAME"], scorecard["Revenue"]/1e6,   COPPER, 1, 1, "Revenue")
+    sparkline(scorecard["MONTH_NAME"], scorecard["Volume"]/1e6,    BLUE,   1, 2, "Volume")
+    sparkline(scorecard["MONTH_NAME"], scorecard["LME"],           TEAL,   2, 1, "LME")
+    sparkline(scorecard["MONTH_NAME"], scorecard["Spread"],        GOLD,   2, 2, "Spread")
+
+    fig_sc.update_layout(
+        paper_bgcolor=NAVY, plot_bgcolor="#090e1c",
+        font=dict(color="#4a6080", family="Inter", size=12),
+        showlegend=False, height=550,
+        margin=dict(t=55, b=30, l=40, r=40),
+        hoverlabel=dict(bgcolor=NAVY_MD, font=dict(color=ICE)),
+    )
+    for ann in fig_sc.layout.annotations:
+        ann.font.color = COP_LT
+        ann.font.size  = 12
+    fig_sc.update_xaxes(gridcolor="rgba(255,255,255,0.03)", tickfont=dict(color="#3a5070"))
+    fig_sc.update_yaxes(gridcolor="rgba(255,255,255,0.03)", tickfont=dict(color="#3a5070"),
+                        zeroline=False)
+    st.plotly_chart(fig_sc, use_container_width=True)
+
+    # ── Monthly summary table
+    sec("📋","Monthly Performance Table")
+    sc_display = scorecard[["MONTH_NAME","Revenue","Volume","Tonnage","LME","Basic","Spread","AV_km","Rev_share"]].copy()
+    sc_display.columns = ["Month","Revenue (€)","Volume (km)","Tonnage (T)",
+                           "All-In LME","Basic LME","Spread (€/kg)","Added Value (€/km)","Rev Share (%)"]
+    # Add MoM growth
+    sc_display["MoM Growth (%)"] = sc_display["Revenue (€)"].pct_change().mul(100).round(1)
+
+    st.dataframe(sc_display.style
+        .format({"Revenue (€)":"€{:,.0f}","Volume (km)":"{:,.0f}","Tonnage (T)":"{:,.0f}",
+                 "All-In LME":"{:.2f}","Basic LME":"{:.2f}","Spread (€/kg)":"{:.2f}",
+                 "Added Value (€/km)":"€{:.2f}","Rev Share (%)":"{:.1f}%",
+                 "MoM Growth (%)":"{:+.1f}%"})
+        .set_properties(**{"background-color":NAVY_MD,"color":ICE})
+        .applymap(lambda v: f"color: {'#10b981' if isinstance(v,float) and v>0 else '#f43f5e' if isinstance(v,float) and v<0 else ICE}",
+                  subset=["MoM Growth (%)"]),
+        use_container_width=True, hide_index=True)
+
+    # ── Entity comparison radar
+    sec("🔄","Entity Performance Comparison")
+    cl, cr = st.columns(2)
+    with cl:
+        ent_comp = df.groupby("ENTITY").agg(
+            Revenue=("TOTAL_AMOUNT","sum"),
+            Volume=("QTY_KM","sum"),
+            Tonnage=("RC_KG",lambda x:x.sum()/1000),
+            LME=("LME_SALES","mean"),
+            AV=("AV_INDEX","sum"),
+            QTY=("QTY_KM","sum"),
+        ).reset_index()
+        ent_comp["AV_km"] = ent_comp["AV"] / ent_comp["QTY"]
+
+        fig_ent = go.Figure()
+        colors_e = [BLUE, COPPER]
+        for i, row in ent_comp.iterrows():
+            fig_ent.add_trace(go.Bar(
+                name=row["ENTITY"],
+                x=["Revenue (M€)","Volume (Mkm)","Tonnage (T)","LME (€/kg)","AV (€/km)"],
+                y=[row["Revenue"]/1e6, row["Volume"]/1e6,
+                   row["Tonnage"], row["LME"], row["AV_km"]],
+                marker=dict(color=colors_e[i%2], opacity=0.88),
+            ))
+        alay(fig_ent, barmode="group", title="Entity KPI Comparison")
+        st.plotly_chart(fig_ent, use_container_width=True)
+
+    with cr:
+        # Revenue split by entity per month
+        ent_month = df.groupby(["MONTH_NAME","ENTITY"]).agg(
+            Revenue=("TOTAL_AMOUNT","sum")).reset_index()
+        ent_month["MONTH_NAME"] = pd.Categorical(ent_month["MONTH_NAME"],
+                                                  categories=MONTH_ORDER, ordered=True)
+        ent_month = ent_month.sort_values("MONTH_NAME")
+        fig_em = px.bar(ent_month, x="MONTH_NAME", y="Revenue", color="ENTITY",
+                        barmode="stack", title="Monthly Revenue Stack by Entity",
+                        color_discrete_sequence=[BLUE, COPPER],
+                        text_auto=".2s", labels={"Revenue":"Revenue (€)","MONTH_NAME":"Month"})
+        alay(fig_em)
+        st.plotly_chart(fig_em, use_container_width=True)
