@@ -187,25 +187,25 @@ df_pre = df_raw[
     ins(df_raw["LME_PROJECTS"], f_lmeprj)
 ].copy()
 
-# ── DYNAMIC MULTISELECT for LME values ──
+# ── DYNAMIC SLIDERS based on pre-filtered data ──
 with st.sidebar:
-    def dyn_lme_select(label, col, data):
-        vals = sorted(data[col].dropna().round(4).unique().tolist())
-        vals_str = [str(v) for v in vals]
+    def dyn_slider(label, col, data):
+        s = data[col].dropna()
+        if s.empty: return (0.0, 1.0)
+        mn, mx = float(s.min()), float(s.max())
+        if mn == mx: mx += 0.001
         st.markdown(f'<p class="filter-label">{label}</p>', unsafe_allow_html=True)
-        sel = st.multiselect("", vals_str, default=[],
-                             key=f"lme_ms_{col}", placeholder="All values",
-                             label_visibility="collapsed")
-        return [float(v) for v in sel] if sel else vals
+        return st.slider("", mn, mx, (mn, mx), key=f"sld_{col}",
+                         label_visibility="collapsed", format="%.4f")
 
-    f_lme   = dyn_lme_select("LME Sales (€/kg)",  "LME_SALES",  df_pre)
-    f_basic = dyn_lme_select("Basic LME (€/kg)",  "BASIC_LME",  df_pre)
+    f_lme   = dyn_slider("LME Sales (€/kg)",  "LME_SALES",  df_pre)
+    f_basic = dyn_slider("Basic LME (€/kg)",  "BASIC_LME",  df_pre)
     st.markdown("---")
 
 # ── FULL FILTER ──
 df = df_pre[
-    df_pre["LME_SALES"].round(4).isin([round(v,4) for v in f_lme]) &
-    df_pre["BASIC_LME"].round(4).isin([round(v,4) for v in f_basic])
+    df_pre["LME_SALES"].between(f_lme[0],   f_lme[1]) &
+    df_pre["BASIC_LME"].between(f_basic[0], f_basic[1])
 ].copy()
 
 if df.empty:
@@ -899,4 +899,5 @@ with tab7:
                         text_auto=".2s", labels={"Revenue":"Revenue (€)","MONTH_NAME":"Month"})
         alay(fig_em)
         st.plotly_chart(fig_em, use_container_width=True)
+
 
