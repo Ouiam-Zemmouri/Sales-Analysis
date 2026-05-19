@@ -447,9 +447,9 @@ with tab3:
 # ════ TAB 4 ════
 with tab4:
     sec("🔬","Product Analysis — Family & Cross Section")
-    dim_col = st.radio("Group by",["FAMILY_CS","FAMILY"],horizontal=True,key="dim_r")
+    dim_col = st.radio("Group by",["FAMILY_CS","FAMILY","CROSS_SECTION_MM"],horizontal=True,key="dim_r")
     top_n   = st.slider("Top N references",5,30,15,key="topn_s")
-    dim_lbl = "Family & CS" if dim_col=="FAMILY_CS" else "Family"
+    dim_lbl = {"FAMILY_CS":"Family & CS","FAMILY":"Family","CROSS_SECTION_MM":"Cross Section"}.get(dim_col,"Family & CS")
 
     if dim_col not in df.columns:
         st.warning(f"Column '{dim_col}' not found.")
