@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="LME Sales Analysis 2026",
+    page_title="Sales Analysis 2026",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
