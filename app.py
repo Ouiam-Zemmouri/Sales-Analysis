@@ -228,10 +228,10 @@ def alay(fig, **kw):
 
 # ── TITLE ──
 st.markdown("""<div class="title-banner">
-  <h1>Sales Analysis 2026</h1>
+  <h1>⚡ LME Sales Analysis 2026</h1>
   <p>COFICAB Kenitra · COFICAB Maroc</p>
 </div>""", unsafe_allow_html=True)
-st.caption(f"📊 **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
+st.caption(f"📊 **{len(df):,}** records · **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
 
 tab1,tab2,tab3,tab4,tab5 = st.tabs([
     "📊 KPI Summary","📈 LME Overview","🏭 Fixation Analysis","🔬 Deep Dive","📋 Raw Data"])
@@ -240,11 +240,11 @@ tab1,tab2,tab3,tab4,tab5 = st.tabs([
 with tab1:
     sec("📊","Global Performance Indicators")
     c1,c2,c3,c4,c5 = st.columns(5)
-    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M")
-    kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M")
-    kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}")
-    kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}")
-    kpi(c5,"Avg Basic LME (€/kg)",  f"{BLM:.2f}")
+    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",   "EUR",         COPPER)
+    kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M",    "km",          BLUE)
+    kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}",       "Tonnes",      TEAL)
+    kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}",       "€/kg",        COP_LT)
+    kpi(c5,"Avg Basic LME (€/kg)",  f"{BLM:.2f}",       "€/kg",        GOLD)
 
     st.markdown("<br>", unsafe_allow_html=True)
     c6,c7,c8,c9 = st.columns(4)
@@ -524,6 +524,5 @@ with tab5:
 
 st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
-  LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp
+  LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
-
