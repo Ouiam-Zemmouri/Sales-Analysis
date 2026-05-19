@@ -41,7 +41,7 @@ html,body,[class*="css"]{font-family:'Inter',sans-serif;}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(184,115,51,0.12);}
 .kpi-label{color:#4a6080;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
 .kpi-value{font-size:1.5rem;font-weight:700;line-height:1.1;}
-.kpi-sub{color:#2d4060;font-size:0.67rem;margin-top:5px;}
+.kpi-sub{color:#2d4060;font-size:0.67rem;margin-top:5px;} .kpi-unit{margin-top:4px;}
 
 .section-header{
   color:#b87333;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;
@@ -212,11 +212,13 @@ fix_agg = df.groupby("FIXATION").agg(
     Tonnage_T=("RC_KG",lambda x:x.sum()/1000),
     Qty_Km=("QTY_KM","sum"), CA=("TOTAL_AMOUNT","sum")).reset_index()
 
-def kpi(col, label, val, sub, color=COPPER):
+def kpi(col, label, val, unit, color=COPPER):
     col.markdown(f"""<div class="kpi-card" style="border-left-color:{color};">
       <div class="kpi-label">{label}</div>
+      <div class="kpi-unit" style="color:{color};opacity:0.45;font-size:0.65rem;font-weight:700;
+           letter-spacing:2px;margin-bottom:4px;">{unit}</div>
       <div class="kpi-value" style="color:{color};">{val}</div>
-      <div class="kpi-sub">{sub}</div></div>""", unsafe_allow_html=True)
+      </div>""", unsafe_allow_html=True)
 
 def sec(icon, title):
     st.markdown(f'<div class="section-header">{icon}&nbsp; {title}</div>', unsafe_allow_html=True)
@@ -238,18 +240,18 @@ tab1,tab2,tab3,tab4,tab5 = st.tabs([
 with tab1:
     sec("📊","Global Performance Indicators")
     c1,c2,c3,c4,c5 = st.columns(5)
-    kpi(c1,"Total Revenue",  f"€{TCA/1e6:.2f}M",   "Turnover",         COPPER)
-    kpi(c2,"Total Volume",   f"{TQ:,.0f} km",       "km sold",          BLUE)
-    kpi(c3,"RC Tonnage",     f"{TON:,.1f} T",       "Real Copper",      TEAL)
-    kpi(c4,"Avg All-In LME", f"{ALM:.4f} €/kg",    "Average LME",      COP_LT)
-    kpi(c5,"Avg Basic LME",  f"{BLM:.4f} €/kg",    "Basic LME",        GOLD)
+    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",   "EUR",         COPPER)
+    kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M",    "km",          BLUE)
+    kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}",       "Tonnes",      TEAL)
+    kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}",       "€/kg",        COP_LT)
+    kpi(c5,"Avg Basic LME (€/kg)",  f"{BLM:.2f}",       "€/kg",        GOLD)
 
     st.markdown("<br>", unsafe_allow_html=True)
     c6,c7,c8,c9 = st.columns(4)
-    kpi(c6,"Avg Cross Section", f"{AES:.3f} mm",   "Weighted avg",     SLATE)
-    kpi(c7,"Avg RC kg/km",      f"{ARC:.3f}",      "Real Copper/km",   COPPER)
-    kpi(c8,"Avg CC kg/km",      f"{ACC:.3f}",      "Comm. Copper/km",  BLUE)
-    kpi(c9,"Avg Added Value",   f"€{AAV:.2f}/km",  "Added Value/km",   TEAL)
+    kpi(c6,"Avg Cross Section (mm)", f"{AES:.2f}",      "mm",          SLATE)
+    kpi(c7,"Avg RC (kg/km)",         f"{ARC:.2f}",      "kg/km",       COPPER)
+    kpi(c8,"Avg CC (kg/km)",         f"{ACC:.2f}",      "kg/km",       BLUE)
+    kpi(c9,"Avg Added Value (€/km)", f"{AAV:.2f}",      "€/km",        TEAL)
 
     st.markdown("<br>", unsafe_allow_html=True)
     sec("🏢","Revenue & Volume by Entity")
@@ -524,4 +526,3 @@ st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
   LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
-
