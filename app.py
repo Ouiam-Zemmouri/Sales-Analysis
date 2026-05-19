@@ -228,7 +228,7 @@ def alay(fig, **kw):
 
 # ── TITLE ──
 st.markdown("""<div class="title-banner">
-  <h1>⚡ LME Sales Analysis 2026</h1>
+  <h1>Sales Analysis 2026</h1>
   <p>COFICAB Kenitra · COFICAB Maroc</p>
 </div>""", unsafe_allow_html=True)
 st.caption(f"📊 **{len(df):,}** records · **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
