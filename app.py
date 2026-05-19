@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Sales Analysis 2026",
+    page_title="LME Sales Analysis 2026",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -133,6 +133,11 @@ with st.sidebar:
              style="max-width:148px;border-radius:10px;
                     filter:drop-shadow(0 4px 14px rgba(184,115,51,0.25));"/>
     </div>""", unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("🔄 Refresh Data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+    st.markdown("## 🔍 Filters")
 
     def mf(label, col, order=None):
         if col not in df_raw.columns: return []
@@ -223,10 +228,10 @@ def alay(fig, **kw):
 
 # ── TITLE ──
 st.markdown("""<div class="title-banner">
-  <h1>Sales Analysis 2026</h1>
+  <h1>⚡ LME Sales Analysis 2026</h1>
   <p>COFICAB Kenitra · COFICAB Maroc</p>
 </div>""", unsafe_allow_html=True)
-st.caption(f"📊 **{{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
+st.caption(f"📊 **{len(df):,}** records · **{df['ENTITY'].nunique()}** entit{'y' if df['ENTITY'].nunique()==1 else 'ies'} · **{df['MONTH_NAME'].nunique()}** month(s)")
 
 tab1,tab2,tab3,tab4,tab5 = st.tabs([
     "📊 KPI Summary","📈 LME Overview","🏭 Fixation Analysis","🔬 Deep Dive","📋 Raw Data"])
@@ -235,18 +240,18 @@ tab1,tab2,tab3,tab4,tab5 = st.tabs([
 with tab1:
     sec("📊","Global Performance Indicators")
     c1,c2,c3,c4,c5 = st.columns(5)
-    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",            COPPER)
-    kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M",             BLUE)
-    kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}",             TEAL)
-    kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}",               COP_LT)
-    kpi(c5,"Avg Basic LME (€/kg)",  f"{BLM:.2f}",               GOLD)
+    kpi(c1,"Total Revenue (€)",    f"{TCA/1e6:.2f}M",   "EUR",         COPPER)
+    kpi(c2,"Total Volume (km)",     f"{TQ/1e6:.2f}M",    "km",          BLUE)
+    kpi(c3,"RC Tonnage (T)",        f"{TON:,.0f}",       "Tonnes",      TEAL)
+    kpi(c4,"Avg All-In LME (€/kg)", f"{ALM:.2f}",       "€/kg",        COP_LT)
+    kpi(c5,"Avg Basic LME (€/kg)",  f"{BLM:.2f}",       "€/kg",        GOLD)
 
     st.markdown("<br>", unsafe_allow_html=True)
     c6,c7,c8,c9 = st.columns(4)
-    kpi(c6,"Avg Cross Section (mm)", f"{AES:.2f}",                SLATE)
-    kpi(c7,"Avg RC (kg/km)",         f"{ARC:.2f}",             COPPER)
-    kpi(c8,"Avg CC (kg/km)",         f"{ACC:.2f}",             BLUE)
-    kpi(c9,"Avg Added Value (€/km)", f"{AAV:.2f}",             TEAL)
+    kpi(c6,"Avg Cross Section (mm)", f"{AES:.2f}",      "mm",          SLATE)
+    kpi(c7,"Avg RC (kg/km)",         f"{ARC:.2f}",      "kg/km",       COPPER)
+    kpi(c8,"Avg CC (kg/km)",         f"{ACC:.2f}",      "kg/km",       BLUE)
+    kpi(c9,"Avg Added Value (€/km)", f"{AAV:.2f}",      "€/km",        TEAL)
 
     st.markdown("<br>", unsafe_allow_html=True)
     sec("🏢","Revenue & Volume by Entity")
@@ -276,6 +281,7 @@ with tab1:
 
     sec("📐","Cross Section Summary by Entity")
     es_ent = df.groupby("ENTITY").apply(lambda g: pd.Series({
+        "Total ES mm":      g["ES_MM"].sum(),
         "Total Qty (km)":   g["QTY_KM"].sum(),
         "Avg Cross Sect.":  g["ES_MM"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
         "Avg RC kg/km":     g["RC_KG"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
@@ -283,7 +289,7 @@ with tab1:
         "Avg AV €/km":      g["AV_INDEX"].sum()/g["QTY_KM"].sum() if g["QTY_KM"].sum() else 0,
     })).reset_index()
     st.dataframe(es_ent.style
-        .format({"Total Qty (km)":"{:,.2f}","Avg Cross Sect.":"{:.3f}",
+        .format({"Total ES mm":"{:,.3f}","Total Qty (km)":"{:,.2f}","Avg Cross Sect.":"{:.3f}",
                  "Avg RC kg/km":"{:.3f}","Avg CC kg/km":"{:.3f}","Avg AV €/km":"€{:.2f}"})
         .set_properties(**{"background-color":NAVY_MD,"color":ICE}),
         use_container_width=True, hide_index=True)
@@ -520,3 +526,4 @@ st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
   LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
+
