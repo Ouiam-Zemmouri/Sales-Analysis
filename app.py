@@ -507,7 +507,7 @@ with tab4:
                  title="Volume (km) by Spool Type & Entity",
                  color_discrete_sequence=ENT_C,labels={"Qty_Km":"Volume (km)"})
     alay(figsp); st.plotly_chart(figsp,use_container_width=True)
-
+    
 # ════ TAB 5 ════
 with tab5:
     sec("📋","Filtered Dataset")
