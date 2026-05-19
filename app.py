@@ -92,13 +92,11 @@ LAY = dict(
 )
 
 # ── LOAD DATA — new clean CSV ──
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=1)
 def load_data():
     import os, glob
     # Find any CSV in the repo
     candidates = glob.glob("*.csv") + glob.glob("**/*.csv", recursive=False)
-    st.sidebar.caption(f"📂 Files found: {candidates}")
-    
     for fname in ["lme_data.csv", "lme_data_final.csv", "lme_dashboard_data.csv"] + candidates:
         if os.path.exists(fname):
             df = pd.read_csv(fname, encoding="utf-8")
@@ -122,7 +120,6 @@ def load_data():
             if "ENTITY" in df.columns:
                 df["ENTITY"] = df["ENTITY"].astype(str).str.split(",").str[0].str.strip()
             
-            st.sidebar.caption(f"✅ Loaded: {fname} | ENTITY: {df['ENTITY'].unique().tolist() if 'ENTITY' in df.columns else 'missing'}")
             return df
     st.error("❌ No CSV data file found in repository.")
     st.stop()
@@ -137,6 +134,9 @@ with st.sidebar:
                     filter:drop-shadow(0 4px 14px rgba(184,115,51,0.25));"/>
     </div>""", unsafe_allow_html=True)
     st.markdown("---")
+    if st.button("🔄 Refresh Data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
     st.markdown("## 🔍 Filters")
 
     def mf(label, col, order=None):
@@ -524,5 +524,4 @@ st.markdown(f"""<div style="text-align:center;color:#1a2e4a;font-size:0.72rem;
   margin-top:48px;padding:16px;border-top:1px solid rgba(184,115,51,0.12);">
   LME Sales Analysis 2026 &nbsp;·&nbsp; COFICAB Kenitra &amp; COFICAB Maroc &nbsp;·&nbsp; Confidential
 </div>""",unsafe_allow_html=True)
-
 
