@@ -133,9 +133,6 @@ with st.sidebar:
              style="max-width:148px;border-radius:10px;
                     filter:drop-shadow(0 4px 14px rgba(184,115,51,0.25));"/>
     </div>""", unsafe_allow_html=True)
-    st.markdown("---")
-        st.rerun()
-    st.markdown("## 🔍 Filters")
 
     def mf(label, col, order=None):
         if col not in df_raw.columns: return []
